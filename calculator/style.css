@@ -1,0 +1,108 @@
+:root {
+    --main-color: #4caf50;
+    --hover-color: #449d48;
+    --result-color: #2e7d32;
+    --error-color: #a8d5a2;
+    --transition-duration: 0.2s;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    background: #e8f5e9;
+    padding: 20px;
+}
+
+.calculator {
+    background: #f0f9f0;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--result-color);
+}
+
+.input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+input, select, button {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #c8e6c9;
+}
+
+input {
+    flex: 1;
+    width: 100%;
+}
+
+select {
+    width: 90px;
+}
+
+button {
+    width: 100%;
+    margin-top: 10px;
+    background: var(--main-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition-duration);
+}
+
+button:hover {
+    background: var(--hover-color);
+}
+
+.result {
+    margin-top: 15px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.result--ok {
+    color: var(--result-color);
+}
+
+.result--error {
+    color: var(--error-color);
+}
+
+.history {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #555;
+}
+
+.history-item {
+    margin-bottom: 5px;
+}
+
+@media (max-width: 480px) {
+    .input-row {
+        flex-direction: column;
+    }
+    select {
+        width: 100%;
+    }
+}
