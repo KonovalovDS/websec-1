@@ -5,11 +5,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const num1Input = document.getElementById('num1');
     const num2Input = document.getElementById('num2');
     const operationSelect = document.getElementById('operation');
-    const resultDiv = document.getElementById('result');
     const historyList = document.getElementById('historyList');
     const calculateBtn = document.getElementById('calculateBtn');
 
-    if (!num1Input || !num2Input || !operationSelect || !resultDiv || !historyList || !calculateBtn) {
+    if (!num1Input || !num2Input || !operationSelect || !historyList || !calculateBtn) {
         console.error('Не найден один из элементов калькулятора');
         return;
     }
@@ -32,8 +31,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 const storedData = localStorage.getItem('calculatorHistory');
                 if (storedData) {
                     const parsedHistory = JSON.parse(storedData);
-                    history.length = 0; 
-                    history.push(...parsedHistory);
+                    history.length = 0;
+                    parsedHistory.forEach(item => {
+                        if (typeof item === 'string') {
+                            history.push({ text: item, isError: false, timestamp: Date.now() });
+                        } else {
+                            history.push(item);
+                        }
+                    });
                 }
             } catch(e) {
                 console.warn('Ошибка чтения истории из localStorage', e);
@@ -48,11 +53,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const num2 = parseFloat(num2Input.value);
         const operation = operationSelect.value;
 
-        resultDiv.classList.remove('result--ok', 'result--error');
-
         if (isNaN(num1) || isNaN(num2)) {
-            resultDiv.textContent = 'Введите корректные числа!';
-            resultDiv.classList.add('result--error');
+            addHistoryItem('Введите корректные числа!', true);
             return;
         }
 
@@ -63,8 +65,7 @@ document.addEventListener("DOMContentLoaded", function() {
             case '*': res = num1 * num2; break;
             case '/':
                 if (num2 === 0) {
-                    resultDiv.textContent = 'Деление на 0 невозможно!';
-                    resultDiv.classList.add('result--error');
+                    addHistoryItem('Деление на 0 невозможно!', true);
                     return;
                 }
                 res = num1 / num2;
@@ -73,15 +74,17 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         const expression = `${num1} ${operation} ${num2} = ${res}`;
-        resultDiv.textContent = expression;
-        resultDiv.classList.add('result--ok');
+        addHistoryItem(expression, false);
+        saveHistory();
+    }
 
-        history.unshift(expression);
+    function addHistoryItem(text, isError) {
+        const item = { text, isError, timestamp: Date.now() };
+        history.unshift(item);
         if (history.length > maxHistory) {
             history.pop();
         }
         updateHistoryUI();
-        saveHistory();
     }
 
     function saveHistory() {
@@ -101,10 +104,20 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        history.forEach(item => {
+        history.forEach((item, index) => {
             const p = document.createElement('p');
             p.className = 'history-item';
-            p.textContent = item;
+            
+            if (item.isError) {
+                p.classList.add('history-item--error');
+            }
+            
+            if (index === 0 && !item.isError) {
+                p.style.color = 'var(--text-color)';
+                p.style.fontWeight = 'bold';
+            }
+            
+            p.textContent = item.text;
             historyList.appendChild(p);
         });
     }
