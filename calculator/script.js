@@ -1,4 +1,4 @@
-(function() {
+document.addEventListener("DOMContentLoaded", function() {
     const history = [];
     const maxHistory = 10;
 
@@ -14,7 +14,7 @@
         return;
     }
 
-    const canUseLocalStorage = (() => {
+    function checkLocalStorage() {
         try {
             localStorage.setItem('__test__', 'test');
             localStorage.removeItem('__test__');
@@ -22,13 +22,24 @@
         } catch(e) {
             return false;
         }
-    })();
+    }
 
-    if (canUseLocalStorage) {
-        try {
-            const stored = localStorage.getItem('calculatorHistory');
-            if (stored) history.push(...JSON.parse(stored));
-        } catch(e) { history.length = 0; }
+    function initHistory() {
+        const isStorageAvailable = checkLocalStorage();
+
+        if (isStorageAvailable) {
+            try {
+                const storedData = localStorage.getItem('calculatorHistory');
+                if (storedData) {
+                    const parsedHistory = JSON.parse(storedData);
+                    history.length = 0; 
+                    history.push(...parsedHistory);
+                }
+            } catch(e) {
+                console.warn('Ошибка чтения истории из localStorage', e);
+                history.length = 0;
+            }
+        }
         updateHistoryUI();
     }
 
@@ -66,13 +77,20 @@
         resultDiv.classList.add('result--ok');
 
         history.unshift(expression);
-        if (history.length > maxHistory) history.pop();
+        if (history.length > maxHistory) {
+            history.pop();
+        }
         updateHistoryUI();
+        saveHistory();
+    }
 
-        if (canUseLocalStorage) {
+    function saveHistory() {
+        if (checkLocalStorage()) {
             try {
                 localStorage.setItem('calculatorHistory', JSON.stringify(history));
-            } catch(e) {}
+            } catch(e) {
+                console.error('Не удалось сохранить историю', e);
+            }
         }
     }
 
@@ -92,4 +110,5 @@
     }
 
     calculateBtn.addEventListener('click', calculate);
-})();
+    initHistory();
+});
